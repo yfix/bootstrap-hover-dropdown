@@ -1,15 +1,13 @@
 /**
+ * @preserve
  * Project: Bootstrap Hover Dropdown
  * Author: Cameron Spear
+ * Version: v2.0.11
  * Contributors: Mattia Larentis
- *
  * Dependencies: Bootstrap's Dropdown plugin, jQuery
- *
- * A simple plugin to enable Bootstrap dropdowns to active on hover and provide a nice user experience.
- *
+ * Description: A simple plugin to enable Bootstrap dropdowns to active on hover and provide a nice user experience.
  * License: MIT
- *
- * http://cameronspear.com/blog/bootstrap-dropdown-on-hover-plugin/
+ * Homepage: http://cameronspear.com/blog/bootstrap-dropdown-on-hover-plugin/
  */
 ;(function ($, window, undefined) {
     // outside the scope of the jQuery plugin to
@@ -48,19 +46,12 @@
             $parent.hover(function (event) {
                 // so a neighbor can't open the dropdown
                 if(!$parent.hasClass('open') && !$this.is(event.target)) {
-                    // stop this event, stop executing any code 
+                    // stop this event, stop executing any code
                     // in this callback but continue to propagate
-                    return true; 
+                    return true;
                 }
 
-                $allDropdowns.find(':focus').blur();
-
-                if(settings.instantlyCloseOthers === true)
-                    $allDropdowns.removeClass('open');
-
-                window.clearTimeout(timeout);
-                $parent.addClass('open');
-                $this.trigger(showEvent);
+                openDropdown(event);
             }, function () {
                 timeout = window.setTimeout(function () {
                     $parent.removeClass('open');
@@ -69,15 +60,16 @@
             });
 
             // this helps with button groups!
-            $this.hover(function () {
-                $allDropdowns.find(':focus').blur();
+            $this.hover(function (event) {
+                // this helps prevent a double event from firing.
+                // see https://github.com/CWSpear/bootstrap-hover-dropdown/issues/55
+                if(!$parent.hasClass('open') && !$parent.is(event.target)) {
+                    // stop this event, stop executing any code
+                    // in this callback but continue to propagate
+                    return true;
+                }
 
-                if(settings.instantlyCloseOthers === true)
-                    $allDropdowns.removeClass('open');
-
-                window.clearTimeout(timeout);
-                $parent.addClass('open');
-                $this.trigger(showEvent);
+                openDropdown(event);
             });
 
             // handle submenus
@@ -96,6 +88,17 @@
                     }, settings.delay);
                 });
             });
+
+            function openDropdown(event) {
+                $allDropdowns.find(':focus').blur();
+
+                if(settings.instantlyCloseOthers === true)
+                    $allDropdowns.removeClass('open');
+
+                window.clearTimeout(timeout);
+                $parent.addClass('open');
+                $this.trigger(showEvent);
+            }
         });
     };
 
